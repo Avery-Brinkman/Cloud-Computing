@@ -22,7 +22,7 @@ app.secret_key = os.getenv("SECRET_KEY")
 
 @app.route("/")
 def hello_world():
-    return render_template("index.html")
+    return render_template("index.html", loggedIn=verifyUser())
 
 
 @app.route("/signup", methods=["GET", "POST"])
