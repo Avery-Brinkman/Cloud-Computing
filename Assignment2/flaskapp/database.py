@@ -1,5 +1,5 @@
 import sqlite3
-from typing import Callable
+from typing import Any, Callable
 
 from User import User
 from UserInfo import UserInfo
@@ -12,7 +12,12 @@ def _runFunction(function: Callable, params: dict):
     cur = con.cursor()
     cur.execute("PRAGMA foreign_keys = 1")
 
-    results = function(cur, params)
+    try:
+        results = function(cur, params)
+    except:
+        con.commit()
+        con.close()
+        return None
 
     con.commit()
     con.close()
@@ -20,24 +25,25 @@ def _runFunction(function: Callable, params: dict):
     return results
 
 
-def _convertToUser(data: tuple) -> User:
+def _convertToUser(data: tuple[int, str, str]) -> User:
     return User(data[0], data[1], data[2])
 
 
-def _convertToUserInfo(user: User, data: tuple) -> UserInfo:
+def _convertToUserInfo(user: User, data: tuple[Any, str, str, str]) -> UserInfo:
     return UserInfo(user, data[1], data[2], data[3])
 
 
-def _convertToUserInfo_fullData(data: tuple) -> UserInfo:
+def _convertToUserInfo_fullData(data: tuple[int, str, str, str, str, str]) -> UserInfo:
     return UserInfo(User(data[0], data[1], data[2]), data[3], data[4], data[5])
 
 
-def _createUser(cur: sqlite3.Cursor, params: dict) -> User:
+def _createUser(cur: sqlite3.Cursor, params: dict) -> User | None:
     # Add row
     cur.execute(
         "INSERT INTO users (userName, password) VALUES (:userName, :password)",
         params,
     )
+
     # Get data
     result = cur.execute(
         "SELECT * FROM users WHERE rowid=?", (cur.lastrowid,)
@@ -46,12 +52,13 @@ def _createUser(cur: sqlite3.Cursor, params: dict) -> User:
     return _convertToUser(result)
 
 
-def _addUserInfo(cur: sqlite3.Cursor, params: dict) -> UserInfo:
+def _addUserInfo(cur: sqlite3.Cursor, params: dict) -> UserInfo | None:
     # Add row
     cur.execute(
         "INSERT INTO userInfo (id, firstName, lastName, email) VALUES (:id, :firstName, :lastName, :email)",
         params,
     )
+
     # Get data
     result = cur.execute(
         "SELECT * FROM userInfo WHERE rowid=?", (cur.lastrowid,)
@@ -59,34 +66,44 @@ def _addUserInfo(cur: sqlite3.Cursor, params: dict) -> UserInfo:
     return _convertToUserInfo(params["user"], result)
 
 
-def _getUser(cur: sqlite3.Cursor, params: dict) -> User:
+def _getUser(cur: sqlite3.Cursor, params: dict) -> User | None:
     result = cur.execute("SELECT * FROM users WHERE id=:id", params).fetchone()
+    if len(result) != 1:
+        return None
     return _convertToUser(result)
 
 
-def _getUserInfo(cur: sqlite3.Cursor, params: dict) -> UserInfo:
+def _getUserInfo(cur: sqlite3.Cursor, params: dict) -> UserInfo | None:
     result = cur.execute(
         """SELECT users.id, users.userName, users.password, userInfo.firstname, userInfo.lastName, userInfo.email 
                                 FROM userInfo 
                                 INNER JOIN users ON users.id=userInfo.id WHERE userInfo.id=:id""",
         params,
     ).fetchone()
+
+    if len(result) != 1:
+        return None
     return _convertToUserInfo_fullData(result)
 
 
-def _getUserFromLogin(cur: sqlite3.Cursor, params: dict) -> User:
+def _getUserFromLogin(cur: sqlite3.Cursor, params: dict) -> User | None:
     result = cur.execute(
         "SELECT * FROM users WHERE userName=:userName", params
     ).fetchone()
+
+    if len(result) != 1:
+        return None
     return _convertToUser(result)
 
 
-def createUser(userName: str, passwordHash: str) -> User:
+def createUser(userName: str, passwordHash: str) -> User | None:
     params = {"userName": userName, "password": passwordHash}
     return _runFunction(_createUser, params)
 
 
-def addUserInfo(user: User, firstName: str, lastName: str, email: str) -> UserInfo:
+def addUserInfo(
+    user: User, firstName: str, lastName: str, email: str
+) -> UserInfo | None:
     params = {
         "id": user.id,
         "firstName": firstName,
@@ -97,16 +114,16 @@ def addUserInfo(user: User, firstName: str, lastName: str, email: str) -> UserIn
     return _runFunction(_addUserInfo, params)
 
 
-def getUser(id: int) -> User:
+def getUser(id: int) -> User | None:
     params = {"id": id}
     return _runFunction(_getUser, params)
 
 
-def getUserInfo(id: int) -> UserInfo:
+def getUserInfo(id: int) -> UserInfo | None:
     params = {"id": id}
     return _runFunction(_getUserInfo, params)
 
 
-def getUserFromLogin(userName: str) -> User:
+def getUserFromLogin(userName: str) -> User | None:
     params = {"userName": userName}
     return _runFunction(_getUserFromLogin, params)

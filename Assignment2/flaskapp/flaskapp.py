@@ -1,10 +1,9 @@
-import bcrypt
 from create_database import create_database
-from database import createUser, addUserInfo, getUser, getUserInfo, getUserFromLogin
+from database import getUserInfo
 from dotenv import load_dotenv
 from flask import Flask, redirect, render_template, request, session
 import os
-from UserInfo import UserInfo
+from backend import login, signup, userInfo, verifyUser
 
 # Constants
 ROOT = "/var/www/html/flaskapp"
@@ -28,6 +27,10 @@ def hello_world():
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup_page():
+    # If we're already logged in, redirect
+    if verifyUser():
+        return redirect("/me")
+
     if request.method == "POST":
         if signup(
             request.form["user_name"], request.form["pswrd"], request.form["c_pswrd"]
@@ -39,14 +42,19 @@ def signup_page():
 
 @app.route("/signup/info", methods=["GET", "POST"])
 def signup_info_page():
-    if "id" in session:
+    # Check that user is logged in
+    if verifyUser():
         if request.method == "POST":
+            # Add the user info
             userInfo(
                 request.form["firstName"],
                 request.form["lastName"],
                 request.form["email"],
             )
+            # Show info
             return redirect("/me")
+
+        # GET req for logged in user (to enter info)
         return render_template("info.html")
 
     return redirect("/signup")
@@ -55,7 +63,13 @@ def signup_info_page():
 @app.route("/login", methods=["GET", "POST"])
 def login_page():
     if request.method == "POST":
+        # Try to login
         if login(request.form["user_name"], request.form["pswrd"]):
+            # Check if info needs to be added
+            if getUserInfo(session["id"]) == None:
+                return redirect("signup/info")
+
+            # Otherwise show user info
             return redirect("me")
 
     return render_template("login.html")
@@ -63,42 +77,24 @@ def login_page():
 
 @app.route("/me")
 def me_page():
-    if "id" in session:
+    # Check that user is logged in
+    if verifyUser():
+        # Get their info
         userInfo = getUserInfo(session["id"])
-        return render_template(
-            "me.html",
-            userName=userInfo.user.userName,
-            firstName=userInfo.firstName,
-            lastName=userInfo.lastName,
-            email=userInfo.email,
-        )
-    else:
-        return redirect("login")
 
+        # Check that we have info
+        if userInfo != None:
+            # Show page w user info
+            return render_template(
+                "me.html",
+                userName=userInfo.user.userName,
+                firstName=userInfo.firstName,
+                lastName=userInfo.lastName,
+                email=userInfo.email,
+            )
 
-def login(userName: str, password: str):
-    user = getUserFromLogin(userName)
-
-    if bcrypt.checkpw(bytes(password, "utf-8"), bytes(user.password, "utf-8")):
-        session["id"] = user.id
-        return True
-
-    return False
-
-
-def signup(userName: str, password: str, confirmPassword: str):
-    if password != confirmPassword:
-        return False
-
-    passHash = bcrypt.hashpw(bytes(password, "utf-8"), bcrypt.gensalt())
-    user = createUser(userName, passHash.decode("utf-8"))
-    session["id"] = user.id
-    return True
-
-
-def userInfo(firstName: str, lastName: str, email: str):
-    user = getUser(session["id"])
-    addUserInfo(user, firstName, lastName, email)
+    # Redirect to login if we failed at any step of the way
+    return redirect("login")
 
 
 if __name__ == "__main__":
