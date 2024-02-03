@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>W3.CSS Template</title>
+    <title>Assignment 2</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
@@ -15,8 +15,18 @@
     <div class="w3-top">
         <div class="w3-bar w3-theme w3-top w3-left-align w3-large">
             <a href="/" class="w3-bar-item w3-button w3-theme-l1">Home</a>
-            <a href="/me" class="w3-bar-item w3-button w3-hide-small w3-hover-white">Me</a>
-            <a href="#" class="w3-bar-item w3-button w3-hide-small w3-hide-medium w3-hover-white">Files</a>
+            {% if loggedIn %}
+            <a id="me-button" href="/me" class="w3-bar-item w3-button w3-hover-white" style='visibility: hidden'>Me</a>
+            <a id="files-button" href="/" class="w3-bar-item w3-button w3-hover-white"
+                style='visibility: hidden'>Files</a>
+            <a id="signout-button" href="/" class="w3-bar-item w3-button w3-hover-white" style='visibility: hidden'>Sign
+                out</a>
+            {% else %}
+            <a id="login-button" href="/login" class="w3-bar-item w3-button w3-hover-white"
+                style='visibility: hidden'>Login</a>
+            <a id="signup-button" href="/signup" class="w3-bar-item w3-button w3-hover-white"
+                style='visibility: hidden'>Signup</a>
+            {% endif %}
         </div>
     </div>
 
