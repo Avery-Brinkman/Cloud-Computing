@@ -1,4 +1,4 @@
-from backend import login, signup, userInfo, verifyUser
+from backend import login, removeFromSession, signup, userInfo, verifyUser
 from create_database import create_database
 from database import getUserInfo
 from dotenv import load_dotenv
@@ -102,6 +102,12 @@ def me_page():
 
     # Redirect to login
     return redirect("/login")
+
+
+@app.route("/signout")
+def signout():
+    removeFromSession()
+    return redirect("/")
 
 
 if __name__ == "__main__":
