@@ -14,13 +14,9 @@ def _runFunction(function: Callable, params: dict):
 
     try:
         results = function(cur, params)
-    except:
+    finally:
         con.commit()
         con.close()
-        return None
-
-    con.commit()
-    con.close()
 
     return results
 
@@ -37,7 +33,7 @@ def _convertToUserInfo_fullData(data: tuple[int, str, str, str, str, str]) -> Us
     return UserInfo(User(data[0], data[1], data[2]), data[3], data[4], data[5])
 
 
-def _createUser(cur: sqlite3.Cursor, params: dict) -> User | None:
+def _createUser(cur: sqlite3.Cursor, params: dict) -> User:
     # Add row
     cur.execute(
         "INSERT INTO users (userName, password) VALUES (:userName, :password)",
@@ -52,7 +48,7 @@ def _createUser(cur: sqlite3.Cursor, params: dict) -> User | None:
     return _convertToUser(result)
 
 
-def _addUserInfo(cur: sqlite3.Cursor, params: dict) -> UserInfo | None:
+def _addUserInfo(cur: sqlite3.Cursor, params: dict) -> UserInfo:
     # Add row
     cur.execute(
         "INSERT INTO userInfo (id, firstName, lastName, email) VALUES (:id, :firstName, :lastName, :email)",
@@ -68,7 +64,7 @@ def _addUserInfo(cur: sqlite3.Cursor, params: dict) -> UserInfo | None:
 
 def _getUser(cur: sqlite3.Cursor, params: dict) -> User | None:
     result = cur.execute("SELECT * FROM users WHERE id=:id", params).fetchone()
-    if len(result) != 1:
+    if result == None:
         return None
     return _convertToUser(result)
 
@@ -81,7 +77,7 @@ def _getUserInfo(cur: sqlite3.Cursor, params: dict) -> UserInfo | None:
         params,
     ).fetchone()
 
-    if len(result) != 1:
+    if result == None:
         return None
     return _convertToUserInfo_fullData(result)
 
@@ -91,19 +87,17 @@ def _getUserFromLogin(cur: sqlite3.Cursor, params: dict) -> User | None:
         "SELECT * FROM users WHERE userName=:userName", params
     ).fetchone()
 
-    if len(result) != 1:
+    if result == None:
         return None
     return _convertToUser(result)
 
 
-def createUser(userName: str, passwordHash: str) -> User | None:
+def createUser(userName: str, passwordHash: str) -> User:
     params = {"userName": userName, "password": passwordHash}
     return _runFunction(_createUser, params)
 
 
-def addUserInfo(
-    user: User, firstName: str, lastName: str, email: str
-) -> UserInfo | None:
+def addUserInfo(user: User, firstName: str, lastName: str, email: str) -> UserInfo:
     params = {
         "id": user.id,
         "firstName": firstName,
