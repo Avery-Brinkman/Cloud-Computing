@@ -2,6 +2,7 @@ import sqlite3
 from typing import Any, Callable
 
 from User import User
+from UserFile import UserFile
 from UserInfo import UserInfo
 
 DATABASE_NAME = "/var/www/html/flaskapp/database.db"
@@ -12,6 +13,7 @@ def _runFunction(function: Callable, params: dict):
     cur = con.cursor()
     cur.execute("PRAGMA foreign_keys = 1")
 
+    results = None
     try:
         results = function(cur, params)
     finally:
@@ -31,6 +33,10 @@ def _convertToUserInfo(user: User, data: tuple[Any, str, str, str]) -> UserInfo:
 
 def _convertToUserInfo_fullData(data: tuple[int, str, str, str, str, str]) -> UserInfo:
     return UserInfo(User(data[0], data[1], data[2]), data[3], data[4], data[5])
+
+
+def _convertToUserFile(data: tuple[int, str, int]) -> UserFile:
+    return UserFile(data[0], data[1], data[2])
 
 
 def _createUser(cur: sqlite3.Cursor, params: dict) -> User:
@@ -92,6 +98,19 @@ def _getUserFromLogin(cur: sqlite3.Cursor, params: dict) -> User | None:
     return _convertToUser(result)
 
 
+def _getUserFiles(cur: sqlite3.Cursor, params: dict) -> list[UserFile]:
+    # Get users files
+    result = cur.execute(
+        "SELECT * FROM files WHERE uploaderId=:uploaderId", params
+    ).fetchall()
+
+    fileList: list[UserFile] = []
+    for file in result:
+        fileList.append(_convertToUserFile(file))
+
+    return fileList
+
+
 def createUser(userName: str, passwordHash: str) -> User:
     params = {"userName": userName, "password": passwordHash}
     return _runFunction(_createUser, params)
@@ -121,3 +140,8 @@ def getUserInfo(id: int) -> UserInfo | None:
 def getUserFromLogin(userName: str) -> User | None:
     params = {"userName": userName}
     return _runFunction(_getUserFromLogin, params)
+
+
+def getUserFiles(userId: int) -> list[UserFile]:
+    params = {"uploaderId": userId}
+    return _runFunction(_getUserFiles, params)

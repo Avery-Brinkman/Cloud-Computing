@@ -1,5 +1,5 @@
 import bcrypt
-from database import createUser, addUserInfo, getUser, getUserFromLogin
+from database import createUser, getUser, getUserFromLogin
 from flask import session
 import jwt
 import os
@@ -12,7 +12,7 @@ def checkPassword(plaintext: str, hashed: str) -> bool:
 
 
 # Checks session info to verify user. Removes info if invalid
-def verifyUser() -> bool:
+def verifyUser() -> User | None:
     # Check for session values
     if ("id" in session) and ("jwt" in session):
         # Get user object by id
@@ -21,7 +21,7 @@ def verifyUser() -> bool:
         # Check that we got a user
         if user == None:
             removeFromSession()
-            return False
+            return None
 
         # Get jwt
         try:
@@ -30,20 +30,19 @@ def verifyUser() -> bool:
             )
         except jwt.exceptions.InvalidTokenError:
             removeFromSession()
-            return False
+            return None
 
         # Check that payload has required values
         if ("id" in payload) and ("userName" in payload):
             # Check that values match the database
-            valid = (payload["id"] == user.id) and (
-                payload["userName"] == user.userName
-            )
-            if not valid:
+            if (payload["id"] == user.id) and (payload["userName"] == user.userName):
+                return user
+            else:
                 removeFromSession()
-            return valid
+                return None
 
     removeFromSession()
-    return False
+    return None
 
 
 # Adds User info to session
@@ -88,10 +87,3 @@ def signup(userName: str, password: str, confirmPassword: str) -> User | None:
         addToSession(user)
 
     return user
-
-
-def userInfo(firstName: str, lastName: str, email: str):
-    user = getUser(session["id"])
-    if user == None:
-        raise Exception(f'Could not find user {session["id"]} to add info to')
-    addUserInfo(user, firstName, lastName, email)

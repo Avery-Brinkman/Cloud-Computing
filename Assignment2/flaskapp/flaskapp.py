@@ -1,6 +1,6 @@
-from backend import login, removeFromSession, signup, userInfo, verifyUser
+from backend import login, removeFromSession, signup, verifyUser
 from create_database import create_database
-from database import getUserInfo
+from database import addUserInfo, getUserFiles, getUserInfo
 from dotenv import load_dotenv
 from flask import Flask, redirect, render_template, request, session
 import os
@@ -22,13 +22,13 @@ app.secret_key = os.getenv("SECRET_KEY")
 
 @app.route("/")
 def hello_world():
-    return render_template("index.html", loggedIn=verifyUser())
+    return render_template("index.html", loggedIn=(verifyUser() != None))
 
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup_page():
     # If we're already logged in, redirect
-    if verifyUser():
+    if verifyUser() != None:
         return redirect("/me")
 
     if request.method == "POST":
@@ -46,10 +46,12 @@ def signup_page():
 @app.route("/signup/info", methods=["GET", "POST"])
 def signup_info_page():
     # Check that user is logged in
-    if verifyUser():
+    user = verifyUser()
+    if user != None:
         if request.method == "POST":
             # Add the user info
-            userInfo(
+            addUserInfo(
+                user,
                 request.form["firstName"],
                 request.form["lastName"],
                 request.form["email"],
@@ -70,7 +72,7 @@ def login_page():
         user = login(request.form["user_name"], request.form["pswrd"])
         if user != None:
             # Check if info needs to be added
-            if getUserInfo(session["id"]) == None:
+            if getUserInfo(user.id) == None:
                 return redirect("/signup/info")
 
             # Otherwise go to homepage
@@ -82,9 +84,10 @@ def login_page():
 @app.route("/me")
 def me_page():
     # Check that user is logged in
-    if verifyUser():
+    user = verifyUser()
+    if user != None:
         # Get their info
-        userInfo = getUserInfo(session["id"])
+        userInfo = getUserInfo(user.id)
 
         # Check that we have info
         if userInfo == None:
@@ -94,7 +97,7 @@ def me_page():
         # Show page w user info
         return render_template(
             "me.html",
-            userName=userInfo.user.userName,
+            userName=user.userName,
             firstName=userInfo.firstName,
             lastName=userInfo.lastName,
             email=userInfo.email,
@@ -102,6 +105,23 @@ def me_page():
 
     # Redirect to login
     return redirect("/login")
+
+
+@app.route("/files")
+def files_page():
+    user = verifyUser()
+    if user != None:
+
+        # Get users files
+        fileList = []
+        for file in getUserFiles(user.id):
+            fileList.append({"id": file.id, "name": file.fileName})
+
+        return render_template(
+            "userFiles.html", userName=user.userName, fileList=fileList
+        )
+
+    return redirect("/")
 
 
 @app.route("/signout")

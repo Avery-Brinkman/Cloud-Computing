@@ -33,9 +33,9 @@ def createFilesTable(cur):
     cur.execute(
         """CREATE TABLE files (
         id INTEGER PRIMARY KEY,
-        filePath VARCHAR,
-        uploader INTEGER,
-        FOREIGN KEY(uploader) REFERENCES users(id)
+        fileName VARCHAR,
+        uploaderId INTEGER,
+        FOREIGN KEY(uploaderId) REFERENCES users(id)
     )"""
     )
 
