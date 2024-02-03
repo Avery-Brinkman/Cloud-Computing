@@ -111,6 +111,14 @@ def _getUserFiles(cur: sqlite3.Cursor, params: dict) -> list[UserFile]:
     return fileList
 
 
+def _getFile(cur: sqlite3.Cursor, params: dict) -> UserFile | None:
+    result = cur.execute("SELECT * FROM files WHERE id=:fileId", params).fetchone()
+
+    if result == None:
+        return None
+    return _convertToUserFile(result)
+
+
 def createUser(userName: str, passwordHash: str) -> User:
     params = {"userName": userName, "password": passwordHash}
     return _runFunction(_createUser, params)
@@ -145,3 +153,8 @@ def getUserFromLogin(userName: str) -> User | None:
 def getUserFiles(userId: int) -> list[UserFile]:
     params = {"uploaderId": userId}
     return _runFunction(_getUserFiles, params)
+
+
+def getFile(fileId: int) -> UserFile | None:
+    params = {"fileId": fileId}
+    return _runFunction(_getFile, params)

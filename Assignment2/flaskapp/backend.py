@@ -19,27 +19,23 @@ def verifyUser() -> User | None:
         user = getUser(session["id"])
 
         # Check that we got a user
-        if user == None:
-            removeFromSession()
-            return None
-
-        # Get jwt
-        try:
-            payload = jwt.decode(
-                session["jwt"], os.getenv("SECRET_KEY"), algorithms=["HS256"]
-            )
-        except jwt.exceptions.InvalidTokenError:
-            removeFromSession()
-            return None
-
-        # Check that payload has required values
-        if ("id" in payload) and ("userName" in payload):
-            # Check that values match the database
-            if (payload["id"] == user.id) and (payload["userName"] == user.userName):
-                return user
-            else:
+        if user != None:
+            # Get jwt
+            try:
+                payload = jwt.decode(
+                    session["jwt"], os.getenv("SECRET_KEY"), algorithms=["HS256"]
+                )
+            except jwt.exceptions.InvalidTokenError:
                 removeFromSession()
                 return None
+
+            # Check that payload has required values
+            if ("id" in payload) and ("userName" in payload):
+                # Check that values match the database
+                if (payload["id"] == user.id) and (
+                    payload["userName"] == user.userName
+                ):
+                    return user
 
     removeFromSession()
     return None
@@ -87,3 +83,15 @@ def signup(userName: str, password: str, confirmPassword: str) -> User | None:
         addToSession(user)
 
     return user
+
+
+# Get file contents as string (or None on error)
+def readFile(fileName: str) -> str | None:
+    try:
+        file = open(fileName, "r")
+        contents = file.read()
+        file.close()
+    except:
+        contents = None
+
+    return contents

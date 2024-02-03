@@ -1,8 +1,8 @@
-from backend import login, removeFromSession, signup, verifyUser
+from backend import login, readFile, removeFromSession, signup, verifyUser
 from create_database import create_database
-from database import addUserInfo, getUserFiles, getUserInfo
+from database import addUserInfo, getFile, getUserFiles, getUserInfo
 from dotenv import load_dotenv
-from flask import Flask, redirect, render_template, request, session
+from flask import Flask, redirect, render_template, request
 import os
 
 # Constants
@@ -37,6 +37,7 @@ def signup_page():
             request.form["pswrd"],
             request.form["c_pswrd"],
         )
+        # Succesfully created account
         if user != None:
             return redirect("/signup/info")
 
@@ -47,22 +48,22 @@ def signup_page():
 def signup_info_page():
     # Check that user is logged in
     user = verifyUser()
-    if user != None:
-        if request.method == "POST":
-            # Add the user info
-            addUserInfo(
-                user,
-                request.form["firstName"],
-                request.form["lastName"],
-                request.form["email"],
-            )
-            # Show info
-            return redirect("/me")
+    if user == None:
+        return redirect("/signup")
 
-        # GET req for logged in user (to enter info)
-        return render_template("info.html")
+    if request.method == "POST":
+        # Add the user info
+        addUserInfo(
+            user,
+            request.form["firstName"],
+            request.form["lastName"],
+            request.form["email"],
+        )
+        # Show info
+        return redirect("/me")
 
-    return redirect("/signup")
+    # GET req for logged in user (to enter info)
+    return render_template("info.html")
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -85,43 +86,71 @@ def login_page():
 def me_page():
     # Check that user is logged in
     user = verifyUser()
-    if user != None:
-        # Get their info
-        userInfo = getUserInfo(user.id)
+    if user == None:
+        # Redirect to login
+        return redirect("/login")
 
-        # Check that we have info
-        if userInfo == None:
-            # Redirect to enter info if missing
-            return redirect("/signup/info")
+    # Get their info
+    userInfo = getUserInfo(user.id)
 
-        # Show page w user info
-        return render_template(
-            "me.html",
-            userName=user.userName,
-            firstName=userInfo.firstName,
-            lastName=userInfo.lastName,
-            email=userInfo.email,
-        )
+    # Check that we have info
+    if userInfo == None:
+        # Redirect to enter info if missing
+        return redirect("/signup/info")
 
-    # Redirect to login
-    return redirect("/login")
+    # Show page w user info
+    return render_template(
+        "me.html",
+        userName=user.userName,
+        firstName=userInfo.firstName,
+        lastName=userInfo.lastName,
+        email=userInfo.email,
+    )
 
 
 @app.route("/files")
 def files_page():
+    # Check that user is logged in
     user = verifyUser()
-    if user != None:
+    if user == None:
+        return redirect("/")
 
-        # Get users files
-        fileList = []
-        for file in getUserFiles(user.id):
-            fileList.append({"id": file.id, "name": file.fileName})
+    # Get users files
+    fileList = []
+    for file in getUserFiles(user.id):
+        fileList.append({"id": file.id, "name": file.fileName})
 
-        return render_template(
-            "userFiles.html", userName=user.userName, fileList=fileList
-        )
+    return render_template("userFiles.html", userName=user.userName, fileList=fileList)
 
-    return redirect("/")
+
+@app.route("/files/<int:fileId>")
+def user_file_page(fileId: int):
+    # Check that user is logged in
+    user = verifyUser()
+    if user == None:
+        return redirect("/")
+
+    # Get the file
+    file = getFile(fileId)
+    # Check that file exists and that user owns it
+    if (file == None) or (user.id != file.uploader):
+        # File doesn't exist (treat not owner as not existing)
+        return render_template("file.html")
+
+    # Try to read the contents
+    contents = readFile(ROOT + "/userFiles/" + file.fileName)
+    if contents == None:
+        # Can't read file
+        return render_template("file.html", fileName=file.fileName)
+
+    # Everything worked
+    wordCount = len(contents.split())
+    return render_template(
+        "file.html",
+        fileContents=contents,
+        fileName=file.fileName,
+        wordCount=wordCount,
+    )
 
 
 @app.route("/signout")
