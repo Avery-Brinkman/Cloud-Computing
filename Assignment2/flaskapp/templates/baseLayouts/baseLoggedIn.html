@@ -1,9 +1,11 @@
 {% extends "baseLayouts/baseButtons.html" %}
+
 {% block buttonsBlock %}
-{{ super() }}
-<a id="me-button" href="/me" class="w3-bar-item w3-button {% block meButtonBlock %}w3-hover-white{% endblock %}">Me</a>
-<a id="files-button" href="/files"
-    class="w3-bar-item w3-button {% block filesButtonBlock %}w3-hover-white{% endblock %}">Files</a>
-<a id="signout-button" href="/signout"
-    class="w3-bar-item w3-button {% block signoutButtonBlock %}w3-hover-white{% endblock %}">Sign out</a>
+    {{ super() }}
+    
+    <a id="me-button" href="/me" class="w3-bar-item w3-button {% block meButtonBlock %}w3-hover-white{% endblock %}">Me</a>
+    <a id="files-button" href="/files"
+        class="w3-bar-item w3-button {% block filesButtonBlock %}w3-hover-white{% endblock %}">Files</a>
+    <a id="signout-button" href="/signout"
+        class="w3-bar-item w3-button {% block signoutButtonBlock %}w3-hover-white{% endblock %}">Sign out</a>
 {% endblock %}

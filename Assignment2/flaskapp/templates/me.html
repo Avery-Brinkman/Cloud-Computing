@@ -1,51 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "baseLayouts/baseLoggedIn.html" %}
 
-<head>
-    <title>{{ userName }}</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
-</head>
+{% block titleBlock %}{{ userName }}{% endblock %}
 
-<body>
-    <div class="w3-top">
-        <div class="w3-bar w3-theme w3-top w3-left-align w3-large">
-            <a href="/" class="w3-bar-item w3-button w3-hover-white">Home</a>
-            <a id="me-button" href="/me" class="w3-bar-item w3-button w3-theme-l1">Me</a>
-            <a id="files-button" href="/files" class="w3-bar-item w3-button w3-hover-white">Files</a>
-            <a id="signout-button" href="/signout" class="w3-bar-item w3-button w3-hover-white">Sign out</a>
-        </div>
-    </div>
+{% block meButtonBlock %}w3-theme-l1{% endblock %}
 
-    <div class="w3-main">
-        <div class="w3-row w3-padding-32">
-            <div class="w3-container">
-                <h1 class="w3-text-teal">Hello, {{ userName }}!</h1>
-                <table>
-                    <tr>
-                        <th>First Name</th>
-                        <td>{{ firstName }}</td>
-                    </tr>
-                    <tr>
-                        <th>Last Name</th>
-                        <td>{{ lastName }}</td>
-                    </tr>
-                    <tr>
-                        <th>Email</th>
-                        <td>{{ email }}</td>
-                    </tr>
-                </table>
-            </div>
-        </div>
+{% block headerBlock %}Hello, {{ userName }}!{% endblock %}
 
-        <footer id="myFooter">
-            <div class="w3-container w3-theme-l1">
-                <p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a></p>
-            </div>
-        </footer>
-    </div>
-</body>
+{% block mainContentBlock %}
+    <table>
+        <tr>
+            <th>First Name</th>
+            <td>{{ firstName }}</td>
+        </tr>
+        <tr>
+            <th>Last Name</th>
+            <td>{{ lastName }}</td>
+        </tr>
+        <tr>
+            <th>Email</th>
+            <td>{{ email }}</td>
+        </tr>
+    </table>
+{% endblock %}
 
-</html>
+{{ super() }}

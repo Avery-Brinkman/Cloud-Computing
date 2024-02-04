@@ -1,59 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "baseLayouts/baseUserFiles.html" %}
 
-<head>
+{% block titleBlock %}
     {% if fileContents %}
-    <title>{{ fileName }}</title>
+        {{ fileName }}
     {% else %}
-    <title>FILE ERROR</title>
+        FILE ERROR
     {% endif %}
+{% endblock %}
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
-</head>
+{% block headerTagsBlock %}
+    {% if fileContents %}
+        style="color: red;"
+    {% else %}
+        class="w3-text-teal"
+    {% endif %}
+{% endblock %}
+{% block headerBlock %}
+    {% if fileContents %}
+        {{ fileName }}
+    {% else %}
+        ERROR
+    {% endif %}
+{% endblock %}
 
-<body>
-    <div class="w3-top">
-        <div class="w3-bar w3-theme w3-top w3-left-align w3-large">
-            <a href="/" class="w3-bar-item w3-button w3-hover-white">Home</a>
-            <a id="me-button" href="/me" class="w3-bar-item w3-button w3-hover-white">Me</a>
-            <a id="files-button" href="/files" class="w3-bar-item w3-button w3-theme-l1">Files</a>
-            <a id="signout-button" href="/signout" class="w3-bar-item w3-button w3-hover-white">Sign out</a>
-        </div>
-    </div>
+{% block mainContentBlock %}
+    {% if fileContents %}
+        <h2>Contents</h2>
+        <p>{{ fileContents }}</p>
+        <h2>Word Count</h2>
+        <p>{{ wordCount }}</p>
+    {% else %}
+        {% if fileName %}
+            Could not read file: {{ fileName }}
+        {% else %}
+            File does not exist
+        {% endif %}
+    {% endif %}
+{% endblock %}
 
-    <div class="w3-main">
-        <div class="w3-row w3-padding-32">
-            <div class="w3-container">
-                {% if fileContents %}
-                <h1 class="w3-text-teal">{{ fileName }}</h1>
-                <h2>Contents</h2>
-                <p>{{ fileContents }}</p>
-                <h2>Word Count</h2>
-                <p>{{ wordCount }}</p>
-                {% else %}
-                <h1 style="color: red;">ERROR</h1>
-                {% if fileName %}
-                <p>Could not read file: {{ fileName }}</p>
-                {% else %}
-                <p>File does not exist</p>
-                {% endif %}
-                {% endif %}
-            </div>
-
+{% block additionalContentBlock %}
+    {% block filePageButtonBlock %}
+        {% if fileContents %}
             <div class="w3-container w3-padding-32">
                 <a id="file-download" class="w3-button w3-theme-l1">Download File</a>
             </div>
-        </div>
+        {% endif %}
+    {% endblock %}
+{% endblock %}
 
-        <footer id="myFooter">
-            <div class="w3-container w3-theme-l1">
-                <p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a></p>
-            </div>
-        </footer>
-    </div>
-</body>
-
-</html>
+{{ super() }}
