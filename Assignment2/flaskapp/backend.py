@@ -1,9 +1,14 @@
 import bcrypt
-from database import createUser, getUser, getUserFromLogin
+from database import createUser, getUser, getUserFromLogin, storeFile
 from flask import session
 import jwt
 import os
 from User import User
+from UserFile import UserFile
+from werkzeug.datastructures import FileStorage
+from werkzeug.utils import secure_filename
+
+ALLOWED_EXTENSIONS = {"txt", "pdf", "png", "jpg", "jpeg", "gif"}
 
 
 # Checks matching password
@@ -95,3 +100,20 @@ def readFile(fileName: str) -> str | None:
         contents = None
 
     return contents
+
+
+def allowedFile(filename: str) -> bool:
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def uploadFile(user: User, reqFile: FileStorage, saveLocation: str) -> UserFile | None:
+    if reqFile.filename == None:
+        return None
+    secureFileName = secure_filename(reqFile.filename)
+
+    file = storeFile(user, secureFileName)
+    if file == None:
+        return None
+
+    reqFile.save(os.path.join(saveLocation, file.localName))
+    return file

@@ -14,7 +14,10 @@
 {% endblock %}
 
 {% block filePageButtonBlock %}
-<a id="file-upload" href="/files/upload" class="w3-button w3-theme-l1">Upload File</a>
+<form method="post" enctype="multipart/form-data">
+    <input type="file" name="file">
+    <input type="submit" class="w3-button w3-theme-l1" value="Upload File">
+</form>
 {% endblock %}
 
 {{ super() }}

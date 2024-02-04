@@ -1,3 +1,4 @@
+import os
 import sqlite3
 
 
@@ -53,3 +54,14 @@ def create_database():
 
     con.commit()
     con.close()
+
+
+def create_file_folder():
+    fileFolder = "/var/www/html/flaskapp/userFiles"
+    if os.path.isdir(fileFolder):
+        for filename in os.listdir(fileFolder):
+            f = os.path.join(fileFolder, filename)
+            if os.path.isfile(f):
+                os.remove(f)
+    else:
+        os.makedirs(fileFolder, 0o764)

@@ -3,3 +3,4 @@ class UserFile:
         self.id = id
         self.fileName = fileName
         self.uploader = uploader
+        self.localName = f"{self.id}_{self.fileName}"

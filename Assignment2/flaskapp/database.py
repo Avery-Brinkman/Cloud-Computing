@@ -119,6 +119,21 @@ def _getFile(cur: sqlite3.Cursor, params: dict) -> UserFile | None:
     return _convertToUserFile(result)
 
 
+def _storeFile(cur: sqlite3.Cursor, params: dict) -> UserFile | None:
+    # Add row
+    cur.execute(
+        "INSERT INTO files (fileName, uploaderId) VALUES (:fileName, :uploaderId)",
+        params,
+    )
+
+    # Get data
+    result = cur.execute(
+        "SELECT * FROM files WHERE rowid=?", (cur.lastrowid,)
+    ).fetchone()
+    # Return new UserFile
+    return _convertToUserFile(result)
+
+
 def createUser(userName: str, passwordHash: str) -> User:
     params = {"userName": userName, "password": passwordHash}
     return _runFunction(_createUser, params)
@@ -158,3 +173,8 @@ def getUserFiles(userId: int) -> list[UserFile]:
 def getFile(fileId: int) -> UserFile | None:
     params = {"fileId": fileId}
     return _runFunction(_getFile, params)
+
+
+def storeFile(uploader: User, fileName: str) -> UserFile | None:
+    params = {"fileName": fileName, "uploaderId": uploader.id}
+    return _runFunction(_storeFile, params)

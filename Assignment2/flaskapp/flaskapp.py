@@ -1,8 +1,10 @@
-from backend import login, readFile, removeFromSession, signup, verifyUser
+from backend import login, readFile, removeFromSession, signup, uploadFile, verifyUser
+from create_database import create_database, create_file_folder
 from database import addUserInfo, getFile, getUserFiles, getUserInfo
 from dotenv import load_dotenv
 from flask import (
     Flask,
+    flash,
     redirect,
     render_template,
     request,
@@ -113,21 +115,35 @@ def me_page():
     )
 
 
-@app.route("/files")
+@app.route("/files", methods=["GET", "POST"])
 def files_page():
     # Check that user is logged in
     user = verifyUser()
     if user == None:
         return redirect("/")
 
-    # Get users files
-    fileList = []
-    for file in getUserFiles(user.id):
-        fileList.append({"id": file.id, "name": file.fileName})
+    # From https://flask.palletsprojects.com/en/2.3.x/patterns/fileuploads/
+    if request.method == "POST":
+        # check if the post request has the file part
+        if "file" in request.files:
+            reqFile = request.files["file"]
+            # If the user does not select a file, the browser submits an empty file without a filename.
+            if reqFile and (reqFile.filename != ""):
+                file = uploadFile(user, reqFile, f"{ROOT}/userFiles")
+                if file != None:
+                    return redirect(f"/files/{file.id}")
 
-    return render_template(
-        "userFiles.html.jinja", userName=user.userName, fileList=fileList
-    )
+        return redirect("/files")
+
+    else:
+        # Get users files
+        fileList = []
+        for file in getUserFiles(user.id):
+            fileList.append({"id": file.id, "name": file.fileName})
+
+        return render_template(
+            "userFiles.html.jinja", userName=user.userName, fileList=fileList
+        )
 
 
 @app.route("/files/<int:fileId>")
@@ -145,7 +161,7 @@ def user_file_page(fileId: int):
         return render_template("file.html.jinja")
 
     # Convert to local storage name
-    filePath = f"{ROOT}/userFiles/{file.id}_{file.fileName}"
+    filePath = f"{ROOT}/userFiles/{file.localName}"
 
     # Try to read the contents
     contents = readFile(filePath)
@@ -179,7 +195,7 @@ def download_file(fileId: int):
         return render_template("file.html.jinja")
 
     return send_from_directory(
-        f"{ROOT}/userFiles", f"{file.id}_{file.fileName}", download_name=file.fileName
+        f"{ROOT}/userFiles", file.localName, download_name=file.fileName
     )
 
 
@@ -190,4 +206,10 @@ def signout():
 
 
 if __name__ == "__main__":
+    # .env Values
+    load_dotenv(ROOT + "/.env")
+
+    if os.getenv("RESET") == "True":
+        create_database()
+        create_file_folder()
     app.run()
