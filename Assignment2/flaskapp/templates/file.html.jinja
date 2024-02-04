@@ -26,7 +26,10 @@ ERROR
 {% block mainContentBlock %}
 {% if fileContents %}
 <h2>Contents</h2>
-<p>{{ fileContents }}</p>
+{% set lines = fileContents.split('\n') %}
+{% for line in lines %}
+<p>{{ line }}</p>
+{% endfor %}
 <h2>Word Count</h2>
 <p>{{ wordCount }}</p>
 {% else %}

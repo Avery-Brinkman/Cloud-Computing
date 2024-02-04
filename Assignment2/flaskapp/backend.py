@@ -93,7 +93,7 @@ def signup(userName: str, password: str, confirmPassword: str) -> User | None:
 # Get file contents as string (or None on error)
 def readFile(fileName: str) -> str | None:
     try:
-        file = open(fileName, "r")
+        file = open(fileName, "r", encoding="utf-8")
         contents = file.read()
         file.close()
     except:
