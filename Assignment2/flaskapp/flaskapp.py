@@ -1,9 +1,15 @@
 from backend import login, readFile, removeFromSession, signup, verifyUser
-from create_database import create_database
 from database import addUserInfo, getFile, getUserFiles, getUserInfo
 from dotenv import load_dotenv
-from flask import Flask, redirect, render_template, request
+from flask import (
+    Flask,
+    redirect,
+    render_template,
+    request,
+    send_from_directory,
+)
 import os
+
 
 # Constants
 ROOT = "/var/www/html/flaskapp"
@@ -13,7 +19,6 @@ DATABASE_NAME = ROOT + "/database.db"
 # Create app
 app = Flask(__name__)
 
-create_database()
 # .env Values
 load_dotenv(ROOT + "/.env")
 # Set secret
@@ -137,8 +142,11 @@ def user_file_page(fileId: int):
         # File doesn't exist (treat not owner as not existing)
         return render_template("file.html")
 
+    # Convert to local storage name
+    filePath = f"{ROOT}/userFiles/{file.id}_{file.fileName}"
+
     # Try to read the contents
-    contents = readFile(ROOT + "/userFiles/" + file.fileName)
+    contents = readFile(filePath)
     if contents == None:
         # Can't read file
         return render_template("file.html", fileName=file.fileName)
@@ -150,6 +158,26 @@ def user_file_page(fileId: int):
         fileContents=contents,
         fileName=file.fileName,
         wordCount=wordCount,
+        fileId=fileId,
+    )
+
+
+@app.route("/files/download/<int:fileId>")
+def download_file(fileId: int):
+    # Check that user is logged in
+    user = verifyUser()
+    if user == None:
+        return redirect("/")
+
+    # Get the file
+    file = getFile(fileId)
+    # Check that file exists and that user owns it
+    if (file == None) or (user.id != file.uploader):
+        # File doesn't exist (treat not owner as not existing)
+        return render_template("file.html")
+
+    return send_from_directory(
+        f"{ROOT}/userFiles", f"{file.id}_{file.fileName}", download_name=file.fileName
     )
 
 

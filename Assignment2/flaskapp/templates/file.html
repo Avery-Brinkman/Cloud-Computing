@@ -42,7 +42,7 @@
     {% block filePageButtonBlock %}
         {% if fileContents %}
             <div class="w3-container w3-padding-32">
-                <a id="file-download" class="w3-button w3-theme-l1">Download File</a>
+                <a id="file-download" class="w3-button w3-theme-l1" href="download/{{ fileId }}">Download File</a>
             </div>
         {% endif %}
     {% endblock %}
