@@ -1,6 +1,4 @@
-from genericpath import isfile
 from backend import login, readFile, removeFromSession, signup, uploadFile, verifyUser
-from create_database import create_database, create_file_folder
 from database import addUserInfo, getFile, getUserFiles, getUserInfo
 from dotenv import load_dotenv
 from flask import (
@@ -217,10 +215,4 @@ def signout():
 
 
 if __name__ == "__main__":
-    # .env Values
-    load_dotenv(ROOT + "/.env")
-
-    if os.getenv("RESET") == "True":
-        create_database()
-        create_file_folder()
     app.run()

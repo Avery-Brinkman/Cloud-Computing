@@ -65,3 +65,8 @@ def create_file_folder():
                 os.remove(f)
     else:
         os.makedirs(fileFolder, 0o764)
+
+
+if __name__ == "__main__":
+    create_database()
+    create_file_folder()
