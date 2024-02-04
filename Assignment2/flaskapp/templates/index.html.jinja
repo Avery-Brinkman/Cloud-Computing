@@ -1,7 +1,7 @@
 {% if loggedIn %}
-    {% extends "baseLayouts/baseLoggedIn.html" %}
+{% extends "baseLayouts/baseLoggedIn.html.jinja" %}
 {% else %}
-    {% extends "baseLayouts/baseLoggedOut.html" %}
+{% extends "baseLayouts/baseLoggedOut.html.jinja" %}
 {% endif %}
 
 {% block titleBlock %}Assignment 2{% endblock %}
@@ -10,8 +10,8 @@
 
 {% block headerBlock %}Welcome to Assignment 2!{% endblock %}
 {% block mainContentBlock %}
-    <p>This is my submission for Assignment 2 of CS-5165: Introduction to Cloud Computing.</p>
-    <p>:)</p>
+<p>This is my submission for Assignment 2 of CS-5165: Introduction to Cloud Computing.</p>
+<p>:)</p>
 {% endblock %}
 
 {{ super() }}

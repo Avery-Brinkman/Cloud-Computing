@@ -27,7 +27,7 @@ app.secret_key = os.getenv("SECRET_KEY")
 
 @app.route("/")
 def hello_world():
-    return render_template("index.html", loggedIn=(verifyUser() != None))
+    return render_template("index.html.jinja", loggedIn=(verifyUser() != None))
 
 
 @app.route("/signup", methods=["GET", "POST"])
@@ -46,7 +46,7 @@ def signup_page():
         if user != None:
             return redirect("/signup/info")
 
-    return render_template("signup.html")
+    return render_template("signup.html.jinja")
 
 
 @app.route("/signup/info", methods=["GET", "POST"])
@@ -68,7 +68,7 @@ def signup_info_page():
         return redirect("/me")
 
     # GET req for logged in user (to enter info)
-    return render_template("info.html")
+    return render_template("info.html.jinja")
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -84,7 +84,7 @@ def login_page():
             # Otherwise go to homepage
             return redirect("/")
 
-    return render_template("login.html")
+    return render_template("login.html.jinja")
 
 
 @app.route("/me")
@@ -105,7 +105,7 @@ def me_page():
 
     # Show page w user info
     return render_template(
-        "me.html",
+        "me.html.jinja",
         userName=user.userName,
         firstName=userInfo.firstName,
         lastName=userInfo.lastName,
@@ -125,7 +125,9 @@ def files_page():
     for file in getUserFiles(user.id):
         fileList.append({"id": file.id, "name": file.fileName})
 
-    return render_template("userFiles.html", userName=user.userName, fileList=fileList)
+    return render_template(
+        "userFiles.html.jinja", userName=user.userName, fileList=fileList
+    )
 
 
 @app.route("/files/<int:fileId>")
@@ -140,7 +142,7 @@ def user_file_page(fileId: int):
     # Check that file exists and that user owns it
     if (file == None) or (user.id != file.uploader):
         # File doesn't exist (treat not owner as not existing)
-        return render_template("file.html")
+        return render_template("file.html.jinja")
 
     # Convert to local storage name
     filePath = f"{ROOT}/userFiles/{file.id}_{file.fileName}"
@@ -149,12 +151,12 @@ def user_file_page(fileId: int):
     contents = readFile(filePath)
     if contents == None:
         # Can't read file
-        return render_template("file.html", fileName=file.fileName)
+        return render_template("file.html.jinja", fileName=file.fileName)
 
     # Everything worked
     wordCount = len(contents.split())
     return render_template(
-        "file.html",
+        "file.html.jinja",
         fileContents=contents,
         fileName=file.fileName,
         wordCount=wordCount,
@@ -174,7 +176,7 @@ def download_file(fileId: int):
     # Check that file exists and that user owns it
     if (file == None) or (user.id != file.uploader):
         # File doesn't exist (treat not owner as not existing)
-        return render_template("file.html")
+        return render_template("file.html.jinja")
 
     return send_from_directory(
         f"{ROOT}/userFiles", f"{file.id}_{file.fileName}", download_name=file.fileName

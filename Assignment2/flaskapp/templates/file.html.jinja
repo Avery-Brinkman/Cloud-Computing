@@ -1,0 +1,51 @@
+{% extends "baseLayouts/baseUserFiles.html.jinja" %}
+
+{% block titleBlock %}
+{% if fileContents %}
+{{ fileName }}
+{% else %}
+FILE ERROR
+{% endif %}
+{% endblock %}
+
+{% block headerTagsBlock %}
+{% if fileContents %}
+class="w3-text-teal"
+{% else %}
+style="color: red;"
+{% endif %}
+{% endblock %}
+{% block headerBlock %}
+{% if fileContents %}
+{{ fileName }}
+{% else %}
+ERROR
+{% endif %}
+{% endblock %}
+
+{% block mainContentBlock %}
+{% if fileContents %}
+<h2>Contents</h2>
+<p>{{ fileContents }}</p>
+<h2>Word Count</h2>
+<p>{{ wordCount }}</p>
+{% else %}
+{% if fileName %}
+Could not read file: {{ fileName }}
+{% else %}
+File does not exist
+{% endif %}
+{% endif %}
+{% endblock %}
+
+{% block additionalContentBlock %}
+{% block filePageButtonBlock %}
+{% if fileContents %}
+<div class="w3-container w3-padding-32">
+    <a id="file-download" class="w3-button w3-theme-l1" href="download/{{ fileId }}">Download File</a>
+</div>
+{% endif %}
+{% endblock %}
+{% endblock %}
+
+{{ super() }}

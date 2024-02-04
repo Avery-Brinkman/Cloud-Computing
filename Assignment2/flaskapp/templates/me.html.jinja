@@ -1,0 +1,26 @@
+{% extends "baseLayouts/baseLoggedIn.html.jinja" %}
+
+{% block titleBlock %}{{ userName }}{% endblock %}
+
+{% block meButtonBlock %}w3-theme-l1{% endblock %}
+
+{% block headerBlock %}Hello, {{ userName }}!{% endblock %}
+
+{% block mainContentBlock %}
+<table>
+    <tr>
+        <th>First Name</th>
+        <td>{{ firstName }}</td>
+    </tr>
+    <tr>
+        <th>Last Name</th>
+        <td>{{ lastName }}</td>
+    </tr>
+    <tr>
+        <th>Email</th>
+        <td>{{ email }}</td>
+    </tr>
+</table>
+{% endblock %}
+
+{{ super() }}
