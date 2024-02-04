@@ -1,3 +1,4 @@
+from genericpath import isfile
 from backend import login, readFile, removeFromSession, signup, uploadFile, verifyUser
 from create_database import create_database, create_file_folder
 from database import addUserInfo, getFile, getUserFiles, getUserInfo
@@ -166,6 +167,16 @@ def user_file_page(fileId: int):
     # Try to read the contents
     contents = readFile(filePath)
     if contents == None:
+        # Check if actually exists and is a visual file
+        if os.path.isfile(filePath):
+            _, fileExtension = os.path.splitext(file.localName)
+            if fileExtension != ".txt":
+                return render_template(
+                    "visualFile.html.jinja",
+                    fileName=file.fileName,
+                    fileId=file.id,
+                )
+
         # Can't read file
         return render_template("file.html.jinja", fileName=file.fileName)
 

@@ -1,0 +1,15 @@
+{% extends "baseLayouts/baseUserFiles.html.jinja" %}
+
+{% block titleBlock %}{{ fileName }}{% endblock %}
+
+{% block headerBlock %}{{ fileName }}{% endblock %}
+
+{% block mainContentBlock %}
+<img src="download/{{ fileId }}" alt="{{ fileName }}">
+{% endblock %}
+
+{% block filePageButtonBlock %}
+<a id="file-download" class="w3-button w3-theme-l1" href="download/{{ fileId }}" download>Download File</a>
+{% endblock %}
+
+{{ super() }}

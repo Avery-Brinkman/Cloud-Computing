@@ -8,7 +8,7 @@ from UserFile import UserFile
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
-ALLOWED_EXTENSIONS = {"txt", "pdf", "png", "jpg", "jpeg", "gif"}
+ALLOWED_EXTENSIONS = {"txt", "png", "jpg", "jpeg", "gif"}
 
 
 # Checks matching password
