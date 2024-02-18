@@ -9,7 +9,7 @@ def listTextFiles() -> str:
     out += "Text files in /home/data:\n"
     for f in files:
         if f.endswith(".txt"):
-            out += f + "\n"
+            out += f"  {f}\n"
     return out
 
 
@@ -31,9 +31,11 @@ def getWordCounts() -> str:
     limerick = parseFile("/home/data/Limerick-1.txt")
 
     # Display info
-    out += f"IF.txt word count: {ifFile['__total__']}\n"
+    out += f"        IF.txt word count: {ifFile['__total__']}\n"
     out += f"Limerick-1.txt word count: {limerick['__total__']}\n"
+    out += "\n"
     out += f"Total word count: {ifFile['__total__'] + limerick['__total__']}\n"
+    out += "\n"
 
     # Don't need total anymore
     ifFile.pop("__total__")
@@ -42,7 +44,7 @@ def getWordCounts() -> str:
     sortedIF = sorted(ifFile.items(), key=lambda x: x[1], reverse=True)
     out += "IF.txt maximum word counts:\n"
     for i in range(3):
-        out += f"{sortedIF[i][0]}: {sortedIF[i][1]}\n"
+        out += f"  {sortedIF[i][0]}: {sortedIF[i][1]}\n"
 
     return out
 
