@@ -56,7 +56,7 @@ def main():
     output = listTextFiles() + "\n" + getWordCounts() + "\n" + getIP()
 
     # (F)
-    with open("/home/output/result.txt", "w") as f:
+    with open("/home/output/result.txt", "w+") as f:
         f.write(output)
 
     # (G)
